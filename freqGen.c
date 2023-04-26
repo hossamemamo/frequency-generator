@@ -9,7 +9,6 @@ sbit C1=P1^4;
 sbit C2=P1^5;
 sbit C3=P1^6;
 sbit C4=P1^7;
-sbit mybit=P2^4;
 
 void keypad_init()
 {
