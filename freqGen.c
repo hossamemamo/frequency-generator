@@ -123,11 +123,22 @@ void display (int n)
 
 /*****************************7 segment****************************/
 
+
+// frequencey generation
+unsigned char high_byte;
+unsigned char low_byte;
+sbit squareWave=P3^7;
+
 void main()
 {
 	int h=0;	
 	int test;
 	int flag=1;
+	float Xtal;
+	float time;
+	float cycles;
+	int timer_cycles;
+	
 	keypad_init();
 while(1)
 {
@@ -149,9 +160,25 @@ while(1)
 		if(h<1000 && test != 72)
 			h=h*10+test;
 	}
+	 Xtal = 1.085;
+	 time = (1/(float)(h*Xtal*2))*1000000;
+	 cycles = time-7;
+	 timer_cycles = 65536 - cycles; 
+	 TMOD = (TMOD & 0x0F) | 0x10;
+
 		while(1)
 	{
 		  display(h);
+			squareWave=1;
+			high_byte = (unsigned char)(timer_cycles >> 8); // extract high byte
+			low_byte = (unsigned char)(timer_cycles & 0xff); // extract low byte
+			TH1 =high_byte;
+			TL1=low_byte;
+	
+			ET1=1;
+			EA=1;
+			TR1=1;
+
 			if(INT0_Pin == 0)
 			{
 				sdelay(300);
@@ -163,3 +190,11 @@ while(1)
 	
 }
 
+
+
+void timer0_isr (void) interrupt 3
+{
+	TH1 =high_byte;
+	TL1=low_byte;
+	squareWave=~squareWave;
+}
